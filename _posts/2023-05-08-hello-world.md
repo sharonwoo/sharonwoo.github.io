@@ -1,13 +1,14 @@
 ---
-title: "Post: Notice"
+title: "Welcome to Jekyll!"
 categories:
-  - Blog
+  - blog
 tags:
-  - Post Formats
-  - notice
+  - update
 ---
 
-A notice displays information that explains nearby content. Often used to call attention to a particular detail.
+Making this blog anew to match my personal site while having a bad time with the runs. 
+
+At this point my blood can probably be used as a superpowered vaccine eh. 
 
 When using Kramdown `{: .notice}` can be added after a sentence to assign the `.notice` to the `<p></p>` element. 
 
