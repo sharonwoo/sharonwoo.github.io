@@ -1,5 +1,5 @@
 ---
-title: "Welcome to Jekyll!"
+title: "hello world"
 categories:
   - blog
 tags:
@@ -9,6 +9,8 @@ tags:
 Making this blog anew to match my personal site while having a bad time with the runs. 
 
 At this point my blood can probably be used as a superpowered vaccine eh. 
+
+<hr/>
 
 When using Kramdown `{: .notice}` can be added after a sentence to assign the `.notice` to the `<p></p>` element. 
 
