@@ -65,27 +65,15 @@ author:
     - label: "Website"
       icon: "fas fa-fw fa-link"
       url: "https://about.iam.computer"
-    # - label: "Twitter"
-    #   icon: "fab fa-fw fa-twitter-square"
-    #   url: "https://twitter.com/"
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
       url: "https://github.com/sharonwoo"
-    # - label: "Instagram"
-    #   icon: "fab fa-fw fa-instagram"
-    #   url: "https://instagram.com/"
 
 footer:
   links:
-    - label: "Twitter"
-      icon: "fab fa-fw fa-twitter-square"
-      url: "https://twitter.com/"
     - label: "GitHub"
       icon: "fab fa-fw fa-github"
-      url: "https://github.com/"
-    - label: "Instagram"
-      icon: "fab fa-fw fa-instagram"
-      url: "https://instagram.com/"
+      url: "https://github.com/sharonwoo/sharonwoo.github.io"
 
 defaults:
   # _posts
@@ -93,12 +81,15 @@ defaults:
       path: ""
       type: posts
     values:
-      layout: single
+      layout: splash
       author_profile: true
       read_time: true
       comments: true
       share: true
       related: true
+      header:
+        image: /assets/images/kazuo-ota-4-2CIlxelxk-unsplash.jpg
+        image_description: "author: kazuo ota on unsplash"
   # _pages
   - scope:
       path: "_pages"
