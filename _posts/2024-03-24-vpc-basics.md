@@ -6,6 +6,8 @@ tags:
   - aws-saa-c03
 ---
 
+I have a bad cold. There goes the running scaleup plan. 
+
 
 ## vpc-vpc-sizing-and-structure-1.txt
 
