@@ -438,3 +438,171 @@ Now we've done that, we should have no problems by opening up CloudFormation and
 
 That being said, at this point, assume the stack deletions worked successfully, we've cleaned up our account. So that's everything I wanted to cover in this demo lesson. Go ahead, complete this video, and when you're ready, I'll see you in the next lesson.
 
+## iam-roles-the-tech
+
+Welcome back. Over the next two lessons, I'll be covering a topic which is usually one of the most difficult identity-related topics in AWS to understand, and that's IAM roles. In this lesson, I'll step through how roles work, their architecture, and how you technically use a role.
+
+In the following lesson, I'll compare roles to IAM users and go into a little bit more detail on when you generally use a role, so some good scenarios which fit using an IAM role. My recommendation is that you watch both these lessons, back to back, in order to fully understand IAM roles. So let's get started.
+
+A role is one type of identity which exists inside an AWS account. The other type, which we've already covered, are IAM users. Remember the term, principal, that I introduced in the previous few lessons?
+
+This is a physical person, application, device, or process which wants to authenticate with AWS. And we defined or authentication as proving to AWS that you are who you say you are. And if you authenticate, and if you are authorized, you can then access one or more resources.
+
+Now, I also previously mentioned that an IAM user is generally designed for situations where a single principal uses that IAM user. I've talked about the way that I decide if something should use an IAM user, is that if I can imagine a single thing, one person, or one application, who uses an identity, then generally under most circumstances, I'd select to use an IAM user. IAM roles are also identities but they're used much differently than IAM users.
+
+A role is generally best suited to be used by an unknown number or multiple principals, not just the one. So this might be multiple AWS users inside the same AWS account, or it could be humans, applications, or services inside outside of your AWS account who make use of that role. If you can't identify the number of principals which use an identity, then it could be a candidate for an IAM role.
+
+Or if you have more than 5,000 principals, because of the number limit for IAM users, it could also be a candidate for an IAM role. Roles are also something which is generally used on a temporary basis. Something becomes that role for a short period of time and then stops.
+
+The role isn't something that represents you. A role is something which represents a level of access inside an AWS account. It's a thing that can be used, short term, by other identities.
+
+These identities assume the role for a short time, they become that role, they use the permissions that that role has, and then they stop being that role. It's not like an IAM user, where you login and it's a representation of you, long term. With a role, you essentially borrow the permissions for a short period of time.
+
+I want to make a point of stressing that distinction. If you're an external identity, a mobile application, maybe, and you assume a role inside my AWS account, then you become that role and you gain access to any access rights that that role has for a short time. You essentially become an identity in my account for a short period of time.
+
+Now, this is the point where most people get a bit confused, and I was no different when I first learned about roles. What's the difference between logging into a user and assuming a role? In both cases, you get the access rights that that identity has.
+
+Now, before we get to the end of this pair of lessons, so this one and the next, I think it's gonna make a little bit more sense, and definitely, as you go through the course and get some practical exposure to roles, I know it's gonna become second nature. IAM users can have identity permissions policies attached to them, either inline JSON, or via attached managed policies. We know now that these control what permissions the identity gets inside AWS.
+
+So whether these policies are inline or managed, they're properly referred to as permissions policies, policies, which grant, so allow or deny, permissions to whatever they're associated with. IAM roles have two types of policies which can be attached: the trust policy and the permissions policy: The trust policy controls which identities can assume that role. With the onscreen example, identity A is allowed to assume the role because identity A is allowed in the trust policy.
+
+Identity B is denied because that identity is not specified as being allowed to assume the role in the trust policy. Now, the trust policy can reference different things. It can reference identities in the same account, so other IAM users, other roles, and even AWS services such as EC2, and a trust policy can also reference identities in other AWS accounts.
+
+As you'll learn later in the course, it can even allow anonymous usage of that role and other types of identities, such as Facebook, Twitter, and Google. If a role gets assumed by something which is allowed to assume it, then AWS generates temporary security credentials and these are made available to the identity which assumed the role. Temporary credentials are very much like access keys, which I covered earlier in the course, but instead of being long term, they're time-limited, so they only work for a certain period of time before they expire.
+
+Once they expire, the identity will need to renew them by reassuming the role and at that point, new credentials are generated and given to the identity again, which assumed that role. Now, these temporary credentials will be able to access whatever AWS resources are specified within the permission's policy. Every time the temporary credentials are used, the access is checked against this permissions policy.
+
+If you change the permissions policy, the permissions of those temporary credentials also change. Now, roles are real identities and, just like IAM users, roles can be referenced within resource policies. So if a role can access an S3 bucket because a resource policy allows it or because the role permissions policy allows it, then anything which successfully assumes the role can also access that resource.
+
+Now, you'll get chance to use roles later in this section when we talk about AWS organizations. We're going to take all the AWS accounts that we've created so far and join them into a single organization, which is AWS's multi-account management product. Roles are used within AWS organizations to allow us to login to one account in the organization and access different accounts without having to login again.
+
+So they become really useful when managing large number of accounts. Now, when you assume a role, temporary credentials are generated by an AWS service called STS, or the Secure Token Service, and this is the operation that's used to assume the role and get the credentials, so sts:AssumeRole. In this lesson, I focused on the technical aspect of roles, so mainly how they work.
+
+I've talked about the trust policy, the permissions policy, and how, when you assume a role, you get temporary security credentials. In the next lesson, I want to step through some example scenarios of where roles are used and I hope by the end of that, you're gonna be clearer on when you should and shouldn't use roles. So go ahead, finish up this video, and when you're ready, you can join me in the next lesson.
+
+## iam-when-to-use-iam-roles
+
+Welcome back. In this lesson, I want to continue immediately from the last one by discussing when and where you might use IAM roles. By talking through some good scenarios for using roles, I want to make sure that you're comfortable with selecting these types of situations where you would choose to use an IAM role and where you wouldn't, because that's essential for a real world AWS usage and for answering exam questions correctly.
+
+So let's get started. Now, one of the most common uses of roles within the same AWS account are for AWS services themselves. AWS services operate on your behalf and they need access rights to perform certain actions.
+
+An example of this is AWS Lambda. Now, I know I haven't covered Lambda yet, but it's a function as a service product. What this means is that you give Lambda some code and create a Lambda function.
+
+This function, when it runs, might do things like start and stop EC2 instances, or it might perform backups, or it might be running real time data processing. What it does exactly isn't all that relevant for this lesson. The key thing though, is a Lambda function, as with most AWS things, has no permissions by default.
+
+A Lambda function is not an AWS identity. It's a component of a service, and so it needs some way of getting permissions to do things when it runs. And running a Lambda function is known as a function invocation or a function execution using Lambda terminology.
+
+So anything that's not an AWS identity, this might be an application or a script running on a piece of compute hardware somewhere, you know now that you need to give that application or that script permissions on AWS using access keys. Rather than hard coding some access keys into your Lambda function, there's actually a better way. To provide these permissions, we can create an IAM role known as a Lambda execution role.
+
+Now, this execution role has a trust policy which trusts the Lambda service. And this means that Lambda is allowed to assume that role whenever a function is executed. This role has a permissions policy which grants access to AWS products and services.
+
+Now, when the function runs, it uses the sts:AssumeRole operation, and then the secure token service generates temporary security credentials and then the runtime environment that the Lambda function runs in can use these temporary credentials to access AWS resources based on whatever permissions the roles permissions policy has. So the code is running in a runtime environment, and it's the runtime environment that assumes the role. The runtime environment gets these temporary security credentials, and then the whole environment, which the code is running inside, can use these credentials to access AWS resources.
+
+So why would you use a role for this? What makes this scenario perfect for using a role? Well, if we didn't use a role, you would need to hard-code permissions into the lamb function by explicitly providing access keys for that function to use, and where possible, you should avoid doing that, because A, it's a security risk and B, it causes problems if you ever need to change or rotate those access keys.
+
+It's always better for AWS products and services, where possible to use a role, because when a role is assumed, it provides a temporary set of credentials with enough time to complete a task and then these are discarded. Now also, for a given Lambda function, you might have one copy running at once, zero copies, 50 copies, a hundred copies, or even more. Because you can't determine this number, because it's unknown, if you remember my rule that I talked about in the previous lesson, if you don't know the number of principles, if it's multiple, or if it's an uncertain number, then it suggests a role might be the most ideal identity to use.
+
+In this case, it is the ideal way of providing Lambda with these credentials is to use a role and allow it to get these temporary credentials. It's always the preferred option when using AWS services to do something on your behalf, use a role, because you don't need to provide any static credentials. Okay, so let's move on to the next scenario.
+
+Another situation where roles are useful are emergency or out of the usual situations. And here's a pretty familiar situation that you might find in a workplace. So this is Wayne, and Wayne works in a business's service desk team.
+
+This team is given read-only access to a customer's AWS account so that they can keep an eye on performance. The idea is that anything more riskier than this read-only level of access is handled by a more senior technical team. We don't want to give Wayne's team long-term permissions to do anything more destructive than this read-only access, but there are always going to be situations which occur when we least want them, normally 3:00 a.m.
+
+on a Sunday morning when a customer might call with an urgent issue where they need Wayne's help to maybe stop or start an instance, or maybe even terminate an EC2 instance and recreate it. So 99% of the time, Wayne and his team are happy with this read-only access, but there are situations when he needs more. And this is a break glass style situation, which is named after this.
+
+The idea of break glass in the physical world is that there is a key for something behind glass. It might be a key for a room that a certain team don't normally have access to. Maybe it's a safe or a filing cabinet.
+
+Whatever it is, the glass provides a barrier, meaning that when people break it, they really mean to break it. It's a confirmation step. So if you break a piece of glass to get a key to do something, there needs to be an intention behind it.
+
+Anyone can break the glass and retrieve the key, but having the glass results in the action only happening when it's really needed. At other times, whatever the key is for remains locked. And you can also tell when it's been used and when it hasn't.
+
+A role can perform the same thing inside an AWS account. Wayne can assume an emergency role when absolutely required. When he does, he'll gain additional permissions based on the role's permission policy.
+
+For a short time, Wayne will, in effect, become the role. Now, this access will be logged and Wayne will know to only use the role under exceptional circumstances. Wayne's normal permissions can remain at read-only which protects him and the customer, but he can obtain more, if required when it's really needed.
+
+So that's another situation where a role might be a great solution. Another scenario when roles come in handy is when you're adding AWS into an existing corporate environment. You might have an existing physical network and an existing provider of identities, known as an identity provider, that your staff use to log into various systems.
+
+And for the sake of this example, let's just say that it's Microsoft Active Directory. In this scenario, you might want to offer your staff single sign-on known as SSO, allowing them to use their existing logins to access AWS. Or you might have upwards of 5,000 accounts.
+
+Remember, there's the 5,000 IAM user limit. So for a corporate, with more than 5,000 staff, you can't offer each of them an IAM user. That is beyond the capabilities of IAM.
+
+Roles are often used when you want to reuse your existing identities for use within AWS. Why? Because external accounts can't be used directly.
+
+You can't access an S3 bucket directly using an Active Directory account. Remember this fact. External accounts or external identities cannot be used directly to access AWS resources.
+
+You can't directly use Facebook, Twitter or Google identities to interact with AWS. There is a separate process which allows you to use these external identities, which I'll be talking about later in the course. Now, architecturally, how this works is you allow an IAM role inside your AWS account to be assumed by one of the external identities, which is in Active Directory, in this case.
+
+When the role is assumed, temporary credentials are generated and these are used to access the resources. Now, there are ways that this is hidden behind the console UI so that it appears seamless, but that's what happens behind the scenes. I'll be covering this in much more detail later in the course when I talk about identity federation, but I wanted to introduce it here, because it is one of the major use cases for IAM roles.
+
+Now, why roles are so important when an existing ID provider such as Active Directory is involved, is that, remember, there is this 5,000 IAM user limit in an account. So if your business has more than 5,000 accounts, then you can't simply create an IAM user for each of those accounts, even if you wanted to. 5,000 is a hard limit.
+
+It can't be changed. Even if you could create more than 5,000 IAM users, would you actually want to manage 5,000 extra accounts? Using a role in this way, so giving permissions to an external identity provider and allowing external identities to assume this role is called ID Federation.
+
+It means you have a small number of roles to manage and external identities can use these roles to access your AWS resources. Another common situation where you might use roles is if you're designing the architecture for a popular mobile application. Maybe it's a ride sharing application which has millions of users.
+
+The application needs to store and retrieve data from a database product in AWS, such as DynamoDB. Now, I've already explained two very important but related concepts on the previous screen. Firstly, that when you interact with AWS resources, you need to use an AWS identity.
+
+And then secondly, that there's this 5,000 IAM user limit per account. So designing an application with this many users which needs access to AWS resources, if you could only use IAM users or identities in AWS, it would be a problem because of this 5,000 user limit. It's a hard limit and it can't be raised.
+
+Now, this is a problem which can be fixed with a process called Web Identity Federation, which uses IAM roles. Most mobile applications that you've used, you might have noticed they allow you to sign in using a web identity. This might be Twitter, Facebook, Google, and potentially many others.
+
+Now, if we utilize this architecture for our web application, we can trust these identities and we can allow these identities to assume an IAM role. And this is based on that role's trust policy. So they can assume that role, gain access to temporary security credentials and use those credentials to access AWS resources, such as DynamoDB.
+
+This is a form of Web Identity Federation, and I'll be covering it in much more detail later in the course. The use of roles in this situation has many advantages. First, there are no AWS credentials stored in the application, which makes it a much more preferred option from a security point of view.
+
+If an application is exploited for whatever reason, there's no chance of credentials being leaked and it uses an IAM role, which you can directly control from your AWS account. Secondly, it makes use of existing accounts that your customers probably already have, so they don't need yet another account to access your service. And lastly, it can scale to hundreds of millions of users and beyond.
+
+And it means you don't need to worry about the 5,000 user IAM limit. This is really important for the exam. There are very often question on how you can architect solutions which will work for mobile applications.
+
+Using ID Federation, so using IAM roles is how you can accomplish that. And again, I'll be providing much more information on ID Federation later in the course. Now, one scenario I want to cover before we finish up this lesson, and that is cross-account access.
+
+In an upcoming lesson, I'll be introducing AWS organizations and you will get to see this type of usage in practice. It's actually how we work in a multi-account environment. Picture the scenario that's on screen now.
+
+Two AWS accounts, yours and a partner account. Now, let's say your partner organization offers an application which processes scientific data and they want you to store any data inside an S3 bucket that's in their account. Your account has thousands of identities and the partner IT team don't want to create IAM users in their account for all of your staff.
+
+In this situation, the best approach is to use a role in the partner account. Your users can assume that role, get temporary security credentials and use those to upload objects. Because the IAM role in the partner account is an identity in that account, then using that role means that any objects that you upload to that bucket are owned by the partner account.
+
+So it's a very simple way of handling permissions when operating between accounts. Now, roles can be used cross account to give access to individual resources like S3 in the onscreen example, or you can use roles to give access to a whole account. And you'll see this in the upcoming AWS organization demo lesson.
+
+In that lesson, we're going to configure it so a role in all of the different AWS accounts that we'll be using for this course can be assumed from the general account. And it means you won't need to log in to all of these different AWS accounts. It makes multi-account management really simple.
+
+Now, I hope by this point, you start to get a feel for when roles are used. Even if you're a little vague, you will learn more as you go through the course. For now, just a basic understanding is enough.
+
+Roles are difficult to understand at first, so you're doing well, if you're anything but confused at this point. I promise you, as we go through the course, and you get more experience, it will become second nature. So at this point, that's everything I wanted to cover.
+
+Thanks for watching. Go ahead and complete this video and when you're ready, join me in the next lesson.
+
+## iam-service-linked-roles-and-passrole
+
+Welcome to this lesson, where I'm going to very briefly talk about a special type of IAM role, and that's service-linked roles. Now, luckily there isn't a great deal of difference between service-linked roles and IAM roles. They're just used in a very specific set of situations.
+
+So let's jump in and get started. So simply put, a service-linked role is an IAM role linked to a specific AWS service. They provide a set of permissions which is predefined by a service.
+
+So they provide permissions that a single AWS service needs to interact with other AWS services on your behalf. Now, service-linked roles might be created by the service itself, or the service might allow you to create the role during the setup process of that service, or service-linked roles might also get created within IAM. Now, the key difference between service-linked roles and normal roles is that you can't delete a service-linked role until it's no longer required.
+
+And that means that it's no longer used within that AWS service. So that's the one key difference. Now, in terms of permissions that you need to create a service-linked role, this is an example of a policy which allows you to create a service-linked role.
+
+So you'll notice a few key elements of this. So in terms of the top statement, it's an allow statement. The action is iam:CreateServiceLinkedRole.
+
+And then for resource, it has this SERVICE-NAME.amazonaws.com. Now, the important thing here is do not try to guess this because different services express this in different ways, the formatting is different, and you're not going to be able to guess this by knowing the name of the service. I've included a link which contains an overview of these attached to this lesson.
+
+But the key thing is the format can differ, and it is case-sensitive. So when you're creating this type of policy to give somebody the ability to create service-linked roles, you have to be careful about making sure you do not guess this element of a statement. Now, another important consideration with service-linked roles is that of role separation.
+
+So when I talk about role separation, I'm not using it in a technical sense. I'm talking about it in a job role sense. So role separation is where you might give one group of people the ability to create roles and another group of people the ability to use them.
+
+So in this case, we might want to give Bob, who is one of our users, the ability to use a service-linked role with an AWS service. So that's using this architecture. So being able to take a service-linked role and assign it to a service.
+
+And if you wanted to give Bob the ability to use a preexisting role with a service but not create that role or edit that role, then you'd need to provide Bob with the PassRole permissions. So this is an example. This allows Bob to pass an existing role into an AWS service.
+
+It's an example of role separation. It means that Bob could configure a service with a role which is already being created by a member of the security team. He'd just need this ListRole and PassRole permissions on that specific role.
+
+Now, this is the same type of architecture as when you use a pre-created role, for example with a CloudFormation stack. You might not have done this lesson yet, but by default, when you're creating a CloudFormation stack, CloudFormation uses the permissions of your identity to interact with AWS, which means not only do you need permissions to create a stack, but you also need permissions to create the resources that that stack creates. So that's the default method.
+
+But what you can do is give, for example, a user Bob the ability to pass a role into CloudFormation. That role could have permissions which exceed those which Bob directly has. So a role that Bob uses could have the ability to create AWS resources where Bob does not.
+
+So Bob might have access to create a stack and to pass in a role, but this role is what provides CloudFormation with the permissions it needs to interact with AWS. So PassRole is a method inside AWS which gives you the ability to implement role separation, and it's something which you can also use with service-linked roles. This is something I just wanted to reiterate so that you understand that passing a role is a very important AWS security architecture.
+
+Now, that is everything I wanted to cover in this very brief lesson. It's really just an extension of what you've already learned about IAM roles, and it's something that you're going to be using in demo lessons elsewhere in the course. For now, I just want you to be aware of how service-linked roles are different than normal roles and how the PassRole architecture works.
+
+But with that being said, that's everything I wanted to cover in this video. So go ahead and complete the video, and when you're ready, I look forward to you joining me in the next.
+
