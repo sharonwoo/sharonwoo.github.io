@@ -606,3 +606,593 @@ Now, that is everything I wanted to cover in this very brief lesson. It's really
 
 But with that being said, that's everything I wanted to cover in this video. So go ahead and complete the video, and when you're ready, I look forward to you joining me in the next.
 
+## iam-aws-organizations
+
+Welcome to this lesson where I'll be introducing AWS Organizations. AWS Organizations is a product which allows larger businesses to manage multiple AWS accounts in a cost-effective way with little to no management overhead. Organizations is a product which has evolved a lot over the past few years, and it's worthwhile stepping through that evolution to help you understand all of the different features.
+
+Now we've got a lot to cover, so let's jump in and get started. Without AWS Organizations, many large businesses would face a situation where they need to manage many AWS accounts. Now, there are four onscreen in this example, but I've worked with some larger enterprises with hundreds of accounts and heard of ones with even more.
+
+Without AWS Organizations, these accounts would each have their own pool of IAM users as well as separate payment methods, and beyond 5 to 10 accounts, this becomes unwieldy very quickly. AWS Organizations is a simple product to understand. First, you take a single AWS account which I'll refer to as a standard AWS account from now on.
+
+So a standard AWS account is an AWS account which is not within an organization. So with this standard AWS account, you create an AWS Organization. And it's important that you understand the organization isn't created in this account; you're just using the account to create the organization.
+
+This standard AWS account that you created the organization with then becomes the Management Account for the organization. Now the Management Account used to be called the Master Account. So if you hear either of these terms, so Management Account or Master Account, just know that it means the same thing.
+
+Now this is a key point to understand with regards to AWS Organizations because the Management Account is special for two reasons, and I'll explain both of those in this lesson. For now, I'll add a crown to this account to indicate that it's the Management Account and help you distinguish between it and any other AWS accounts. Now using this Management Account, you can invite other exist standard AWS accounts into the organization.
+
+Because these are existing accounts, they'll need to approve the invites to join the organization. And assuming they do, those Standard Accounts will then become part of that AWS Organization. When standard AWS account join an AWS Organization, then they change from being Standard Accounts to being Member Accounts of that organization.
+
+Organizations have one and only one Management or Master Account and then they have zero or more Member Accounts. You can create a structure of AWS accounts within an organization, and this is useful if you have lots of accounts and you need to group them by things such as business units, function, or even development stage of an application. Now the structure within AWS Organizations is hierarchical, so it's an inverted tree.
+
+At the top of this tree is the root container of the organization. Now this is just a container for AWS accounts which exists at the top of this organizational structure. Don't confuse this with the Account Root User which is the admin user of an AWS account.
+
+This root, so the organizational root, is just a container within an AWS Organization, which can contain AWS accounts, and this means Member Accounts or the Management Account. As well as containing accounts, the organizational root can also contain other containers, and these are known as organizational units or OUs. And these organizational units can contain AWS accounts or Member Accounts or the Management Account or they can contain other organizational units so you can build a complex nested AWS account structure within Organizations.
+
+You have the root container at the top and then potentially multiple levels of organizational units. Now, again, please don't confuse the organizational root that we're talking about now with the AWS Account Root User. The AWS Account Root User is something specific to every AWS account that you create.
+
+It's something which you can log into and have full permissions over that specific AWS account. The root of an AWS Organization is just a container for AWS accounts and organizational units. So the organizational root is just the top of this tree within AWS Organizations.
+
+It's the top level of this hierarchical structure which allows you to manage AWS accounts within Organizations. One important feature of AWS Organizations which you need to be aware of is consolidated billing. With the example that's onscreen now, there are four AWS accounts, each with their own billing information.
+
+Now because these have been added to an AWS Organization, this changes. The individual billings methods are removed for the Member Accounts within the organization. The Member Accounts instead pass their billing through to the Management Account of the organization.
+
+Now you might see this referred to in the context of consolidated billing as the Payer Account, and the Payer Account is just the AWS account that contains the payment method for the organization. So at this point, if you see Master Account, Management Account, or Payer Account, know that within AWS Organization, they all refer to the same thing, the account that was used to create the organization and the account that contains the payment method for all of the accounts within the AWS Organization. Now using consolidated billing within an AWS Organization means that you get a single monthly bill which is contained within the Management Account.
+
+And this single monthly bill covers the Management Account and all of the Member Accounts of the organization. So one bill contains all of the billable usage of all of the accounts within the AWS Organization. For larger businesses, this removes a significant amount of financial admin overhead.
+
+This alone would be worth creating an organization for most larger enterprises. But it gets better. With AWS, certain services get cheaper the more usage you have, and for certain services you can pay in advance in exchange for cheaper rates.
+
+When using Organizations, these benefits are pooled, and so the organization can benefit as a whole for the spending of each of the AWS accounts within the organization. AWS Organizations also feature a service called Service Control Policies, or SCPs, and this lets you actually restrict what AWS accounts within the organization can do. Now these are important, and so I'm going to be covering them in their own dedicated lesson, which is coming up soon.
+
+But I wanted to mention it at this point as a feature of AWS Organizations. Now, before we go through a demo where we're going to be creating at AWS Organization and creating the final account structure, which we'll be using throughout this course, I wanted to cover two other concepts of Organizations. As well as being able to invite existing accounts into an organization, you can all also create new accounts directly within it.
+
+All you need is a valid unique email address for this new account which you want to create within the organization, and AWS will handle the rest. Adding accounts in this way, so creating them directly within the organization, means that there isn't an invite process. Remember, for existing accounts, you need to invite them, and then that account needs to accept it.
+
+If you create accounts directly within the organization, then this is a single step. You just create the account in the organization. Now using an AWS Organization changes what is best practice in terms of user logins and permissions.
+
+With Organizations, you don't need to have IAM Users inside every single AWS account. Instead, IAM roles can be used to allow IAM Users to access other AWS accounts, and we're going to implement this in the following demo lesson. So best practice is that you have a single account which is used to log into, and I've shown this on this diagram as the Management Account of the organization.
+
+Now larger enterprises will often keep the Management Account of the organization clean and have a separate account dedicated to handle logins. Both of these are fine, but just be aware that the architectural pattern is to have a single AWS account which contains all of the identities which are logged into. Larger enterprises might also have their own existing identity system, and they might want to use those existing identities and use Identity Federation to access this single identity account.
+
+So you can either have your own internal AWS identities using IAM or you can configure AWS to allow Identity Federation so your on-premises identities can be used to access this designated login account. From then, we can use this account with these identities and use a feature called role switch, and we can role switch from this account into other Member Accounts of the organization. And behind the scenes, this actually assumes roles in these other AWS account.
+
+And this can be done from the console UI, and so a lot of the technical aspects are hidden, but I want you to know how this works. So essentially, you either log in directly to this login account or you use Identity Federation. Then once we log into this account, we can role switch into the other accounts within the organization, And this is actually a way that the user interface presents, assuming a role within the other account.
+
+So essentially, you either log in directly to this login account using IAM identities or you use Identity Federation to gain access to this particular login account, and then you role switch from this login account into other accounts within the organization. And behind the scenes, this is essentially assuming a role which is inside these other AWS accounts. And this is how you effectively manage identities using AWS Organizations.
+
+Now I'll be talking about this in-depth as we move through the course. And the next lesson is a demo where you're going to implement this yourself and create the final AWS account structure you'll be using for the remainder of the course. Okay, so at this point, it's time for a demo.
+
+And as I just mentioned, you're going to be creating the account structure you'll be using for the remainder of the course. At the start of the course, I demoed the process of creating AWS accounts. You created some AWS accounts you'll be using for the course.
+
+You should have created a general AWS account and a production AWS account. In the next lesson, I'm going to be step you through how to create an AWS Organization using this general account. So we'll be creating the organization, and this general account will become the Management Account for the AWS Organization.
+
+Then you're going to invite the existing production account into the organization, and this will become a Member Account of the organization. And then finally, you're going to create a brand new account within the organization, which is going to be the Development Account. Now I can't wait.
+
+It's going to be fun and it's going to be really useful for the exam. So go ahead and finish this video. And when you're ready, I look forward to your joining me in the next lesson, which is going to be a demo.
+
+## iam-demo-aws-organizations
+
+Welcome back and in this demo lesson you're going to create the AWS account structure which you'll be using for the remainder of the course. Now at this point what we need to do is to log in to the general AWS account. So I'm currently logged in as the IAM admin user of my general AWS account and I've got the Northern Virginia region selected.
+
+You're also going to need either two different web browsers or a web browser such as Firefox which is capable of using different sessions because we're going to be logged in to multiple AWS accounts at once. So the first thing that we're going to need to do is create the AWS organization. So because I'm logged in to the general AWS account I'm logged into an account which is a standard AWS account.
+
+It isn't part of an AWS organization and so it's not a management account and it's not a member account. So what we need to do is to move it to the AWS organizations part of the console and create the organization. So let's do that.
+
+So to do that go to find services and just start typing organizations and then click to move to the AWS organizations console. Once we're here go ahead and click on create organization. This is going to start the process of creating this AWS organization and as part of that it will convert this standard account to be the management account of the organization.
+
+So go ahead and click on create organization and that will complete the process. So now we have the AWS organization and within it this one single AWS account so the general account has now been converted to the management account of this AWS organization. Now you might see a message saying that we've sent a verification email to this email address so this is the email address that's associated with the general AWS account which is now the management account of the organization and you'll need to click the link within this email to verify this address so you can continue using AWS organization.
+
+So if you do have that notification on screen, go ahead and verify that email before continuing. If you don't have a notification, you're good to continue. Now at this point, what I'll need you to do is to open a brand new web browser or a web browser such as Firefox, which is capable of handling different sessions.
+
+And I'll want you to log in to the production AWS account. So just be careful at this point. You need to make sure that this is a completely separate session and if in doubt use a completely different web browser because we need to maintain logins to both this management account and the production account.
+
+So I'm going to go ahead and log in to the IAM admin user of the production AWS account. So now I'm logged into the production AWS account with this separate browser session so either you'll use a separate browser session or a completely different browser. At this point you're going to need the account ID for the production AWS account.
+
+So click on the account dropdown and make sure that you copy this account ID into your clipboard. And it needs to be the account ID for the production AWS account. Once you've got that, go back to the browser or the session where you have the general account open.
+
+So this is now the management account of the AWS organization. And we're going to invite the production AWS account into this organization. So currently the only account which is a member of this organization is the general account which is the management account of the organization.
+
+We're going to invite the production account. So go ahead and click on add account. We're going to be inviting an existing account into this organization.
+
+So click on invite account and you'll need to provide either the email address of the production account which you used while signing up or the account ID. And I've just demonstrated getting the account ID of the production account from this dropdown, so I'm going to enter this account ID into the box. Now if you're inviting an account which you administer, you don't have to put any notes.
+
+But optionally, if you're inviting an account that's administered by somebody else, then it might be nice to type a message. In either case, once you've entered the email or the account ID, just scroll down and click on 'Send Invitation'. Now depending on your specific AWS account it is possible that you might receive an error message at this point telling you there are too many accounts within the organisation.
+
+Different AWS accounts are created with different account quotas and so it's possible that you might get an error at this point. If you do you just need to log a support request asking for an increase in the number of AWS accounts which can be part of an AWS organisation. If you don't get an error message, then this invite process has started.
+
+What we need to do now is to accept this invite from the production AWS account. So let's go back to this other tab and move across to the organizations console. So in the find services box, just type organizations and then click to move to the organizations console and towards the middle left, you should see this heading saying invitations.
+
+If you just click on invitations, you'll be able to see an overview of all of the invitations which apply to this production AWS account. So this is the invite that we just sent from the general AWS account, which is the management account for our organization. So go ahead and click on accept and this completes the process of joining the organization.
+
+So now the production account is a member of the AWS organization and we can verify that by returning to the tab where we logged in to the general AWS account, which is now the management account for this organization and just hit refresh. And now we should see two AWS accounts, the general account and the production account. So next I'm going to demonstrate how we can roll switch into this production AWS account, which is now a member of the organization.
+
+So when you add an account to an organization, you can do it in two ways. can either invite an existing account or you can create an account within the organization. If you create an account within the organization, then a role is created within that account, which can be role switched into by other accounts within the organization.
+
+If you invite an existing AWS account into the organization, then you need to manually add this role. And that's what we're going to do next. So this only applies if you're inviting existing accounts into the organization.
+
+So what we're going to do is to move across to the browser or session where you're logged in to the production AWS account, click in the services search box at the top of the screen and type IAM and then we're going to move to the IAM console because this is where we create IAM roles. So move to IAM and then go to roles and we're going to create a role which can be from the general account. So click on create role, and the type of trusted entity is going to be another AWS account.
+
+So select this box, and then for the account ID, we need the account ID of the general AWS account, which is now the management account of the organization. So move back to the browser or the session where you're open in the general account, and you need to copy down the account ID of the general AWS account. Make sure you get the general account, not the production account.
+
+Once you've got that in your clipboard, we're going to paste this into this account ID box, and this is going to mean that the general AWS account is trusted to assume this role. So enter that into the box and click next. This role is going to have administrator access attached because it's going to be an administration role.
+
+So look in the policies and look for administrator access, check that box, Scroll to the bottom and click on next to move to the next screen. And we need to give this role a name. So this role is going to be used when we're logged into the general account and we want to role switch into the production account to perform administrative functions.
+
+Now we're going to give this role a very specific name. It's a standard name. This is the same name which AWS use when they automatically create the equivalent role within accounts that you create within the organization.
+
+So I like to keep things consistent. So the name of the role is going to be organization account access role with uppercase O A A and R and note that it's the U S spelling of organization. So make sure you use a Z rather than an S once you've done that, go ahead and click on create role.
+
+Now, if we look inside this role, so select the role and then click on trust relationships, you'll be able to see that this role trusts the account ID of your general AWS account. And this will be different for you. This will be the account ID of your general AWS account.
+
+And this is what will allow identities within the general account to assume this role. So the account that's now the management account of the AWS organization. So now I'm going to show you how we can use this role to switch from the general account to the production account.
+
+And we're going to need to copy down the account ID for the production AWS account because we're going to switch in to that account using role switch. So copy down the account ID of the production AWS account. You'll need to make sure you're logged into the IAM admin user of the general account.
+
+This will only work with IAM identities. Before we do role switch just move back to the main part of the AWS console. So we've got the main console selected and then click on the account drop-down and then select switch roles.
+
+Now this starts the process of role switching from the general account to the production AWS account. So to start that, go ahead and click on switch role. We need to provide the account ID of the production AWS account.
+
+So that should be in your clipboard. Just go ahead and paste that in. Next, we need to provide the name of the role within the production account, which we want to switch to.
+
+This is the role that you just created. So the role, which is called organization account access role with uppercase O A A and R and the US spelling of organization. So we need to enter that into the role name.
+
+Now we need to give this role switch a display name. So the way that this works is that when you initially do a switch role, it's going to create an entry within the console UI and this is stored in your browser. So this is nothing to do with AWS.
+
+This is just creating a shortcut. so you can easily access this in the future. So you need to give it a suitable display name.
+
+I suggest 'Prod' for production. You also need to pick a colour and I try to be consistent with this. So if I'm creating a role switch which is going into a production AWS account, then I pick red so I know that this is an important account.
+
+So select red, make sure it's called 'Prod', double check the spelling of the role name and make sure this account ID is for the production AWS account and then click on switch role. Now at this point this is role switching into the production AWS account. It's actually using the assume role API call to assume the role that you just created within the production AWS account and you can see that we've switched role because at the top here it's got the color red and it has the display name of prod so this means that we've switched into this switch role shortcut that we just created.
+
+Now let's go back to the general account by clicking on switch back. So this now takes us back into the general AWS account and if we click on the account drop down again we can see a role history section. Now when we were just creating this switch role I mentioned how it creates a shortcut and this is that shortcut.
+
+So now if I click on prod again it's going to automatically do a switch roles into the organization account access role within the production account so by clicking this we go back to the production AWS account. What happens behind the scenes is that we assume the role we're provided with temporary credentials that that role grants when we assume it and then the console UI automatically handles this move across to the production account so now we're interacting with the production account using the temporary credentials that we gained by assuming the role. Role switching makes it easy to administer multiple AWS accounts within an AWS organization.
+
+Currently we only have the one but the process would be the same if we had hundreds of AWS accounts. Now let's go back to the general account by clicking on switchback because now we're going to create the development AWS account within our organization. This is going to the third and final account that's a member of this organization and this will complete the account structure you'll be using throughout the course.
+
+This point you can close down the browser window which you have open to the production AWS account or the separate tab because we won't be needing that anymore. Next we're going to create a brand new account within this organization. So go back to the AWS organizations console, click on add account.
+
+This time though we're going to create an account within the organization. So click on create account. You need to give the account a name.
+
+And so I'm going to keep the same naming structure that I've used so far only using development instead of general or production, and you should do the same. You also need to provide a unique email address, which is going to be associated with this development AWS account. So every AWS account, even those created within an organization, they all need to have unique email addresses.
+
+Now, keep in mind the trick that I talked about at the start of the course, where you can create an unlimited number of unique email addresses for one single Gmail account. But each account does need a unique email address. Now, for the accounts that I've previously created as part of this structure, I've used my name, so Adrian and then plus and then training AWS and then the name of the account.
+
+So I'm going to use that same structure here. So Adrian Plus and then Training AWS Development, and you should use the same structure of emails you've been using so far, but use one for the Development AWS account. In this box, you can provide the name of the role which will be created within this brand new AWS account.
+
+Now this is the same role that you just created manually for the production account, But this is created automatically by AWS because when you create an account within an organization, the only method that you have to access this account is by switching role into that account. So we need to give the role a name. Now the default is organization account access role with uppercase O, A, A and R with the US spelling, so with a Z, and we're going to use that default.
+
+And then I'll scroll down and click on create and you should do the same. and at this point it will create this development account within the AWS organization. Now again, if you get an error message at this point saying you've got too many accounts within the organization, then you might have to lodge a support request to have the limit of the number of accounts within an organization increased.
+
+In my case, I haven't had that error and the development account is being created within the organization and that can take a few minutes. But if we refresh this after a few minutes, we should see this populated with values. There we go, we can see the development account has been created and it's been allocated with its own individual account ID.
+
+Now I want you to go ahead and copy this account ID into your clipboard because we're going to go ahead and create a new entry in this switch role dialogue to allow us to connect to the development AWS account which is now a member of this organization. So click on the account dropdown and select switch roles. We're going to follow the same process that we did for the production AWS account.
+
+First, we'll need to enter the account ID for this new development account that we've just created. You'll need to enter the role name. So assuming you picked all of the defaults, this should be organization account access role with uppercase O A A and R and the U S spelling.
+
+So with a Z for the display name this time we're going to put dev for development and rather than picking red my Standard for any development accounts is to pick yellow So this indicates to us that we should still be careful, but we can be less careful than for a production account Which is in red So once you've entered all that information just go ahead and click on switch role and this will follow the same Process as before so now it's switched role into the development AWS account So if we move to the main AWS console, this is now a completely new account, the development account. We can click on the dropdown and see that we've got a new entry in the role history. We could switch back to general.
+
+We could move across to the production AWS account. We can move directly to the development account. So we don't have to go back to the general account before moving to the development account.
+
+We can just use these role switch shortcuts to move directly between accounts. So now that we're in the development account, if we just go to the IAM console, I want to point out that even though we didn't directly create it, by creating a brand new account within this organisation, AWS has created this organisation account access role on our behalf. And if we click on it and then go to Trust Relationships, this role trusts the same general account ID.
+
+So this is the general or the management account of the organization. So by creating this account directly within the organization, AWS has created this role on our behalf that we can switch into from the general AWS account. So at this point, that's everything that I wanted to cover in this demo lesson.
+
+Now you have three different AWS accounts. You have the general AWS account, which was originally a standard AWS account, which is now the management account of this AWS organization that we've just created. In addition to this management account, we've invited the production AWS account into this organization, and we've manually created the role, allowing us to switch role into the production account.
+
+And then finally, we've created a brand new account directly within the organization, which is the development account and AWS automatically on our behalf has created the role within the development account that we can switch role into. So now we have these three AWS accounts. We have the management account, the production account and the development account, and that's everything which I wanted you to do in this demo lesson.
+
+So go ahead and complete this video. And when you're ready, I'll look forward to you joining me in the next.
+
+## iam-service-control-policies
+
+Welcome back, and in this lesson, I'll be talking about service control policies or SCPs. Now, SCPs are a feature of AWS organizations which can be used to restrict AWS accounts. They're an essential feature to understand if you are involved in the design and implementation of larger AWS platforms.
+
+Now, we've got a lot to cover, so let's jump in and get started. At this point, this is what our AWS account setup looks like. We've created an organization for Animals4life, and inside it, we have the general account, which from now on I'll be referring to as the management account, and then two member accounts, so production, which we'll call prod and development which we'll be calling dev.
+
+All of these AWS accounts are within the root container of the organization. That's to say they aren't inside any organizational units. In the next demo lesson, we're going to be adding organizational units, one for production and one for development and we'll be putting the member accounts inside their respective organizational units.
+
+Now, let's talk about service control policies. The concept of a service control policy is simply enough. It's a policy document, so a JSON document, and these service control policies can be attached to the organization as a whole by attaching them to the root container, or they can be attached to one or more organizational units.
+
+And lastly, they can even be attached to individual AWS accounts. Service control policies inherit down the organization tree. So this means if they're attached to the organization as a whole, so the root container of the organization, then they affect all of the accounts inside the organization.
+
+If they're attached to an organizational unit, then they impact all accounts directly inside that organizational unit, as well as all accounts within OUs inside that organizational unit. So if you have nested organizational units, then by attaching them to one OU, they affect that OU and everything below it. If you attach service control policies to one or more accounts, then they just directly affect those accounts that they're attached to.
+
+Now, I mentioned in an earlier lesson that the management account of an organization is special. One of the reasons it's special is that even if the management account has service control policies attached, either directly via an organizational unit, or on the root container of the organization itself, then the management account is never affected by service control policies. Now, this can be both beneficial and it can be a limitation, but as a minimum, you need to be aware of it as a security practice because the management account can't be restricted using service control policies, then generally in production, I avoid using the management account for any AWS resources.
+
+It's the only AWS account within AWS organizations which can't be restricted using service control policies. As a takeaway, just remember that the management account is special and it's unaffected by any service control policies, which are attached to that account either directly or indirectly. Now, service control policies are account permissions boundaries.
+
+And what I mean by that is they limit what the AWS account can do, including the Account Root User within that account. Now, I talked earlier in the course about how you can't restrict an Account Root User. And that is true.
+
+You can't directly restrict what the Account Root User of an AWS account can do. The Account Root User always has full permissions over that entire AWS account, but with a service control policy, you're actually restricting what the account itself can do, specifically any identities within that account. And so you're indirectly restricting the Account Root User because you're reducing the allowed permissions on the account, you're also reducing what the effective permissions on the Account Root User are.
+
+So this is a really fine detail to understand. You can never restrict the Account Root User. It will always have a 100% access to the account, but if you restrict the account, then in effect, you're also restricting the Account Root User.
+
+Now, you might apply a service control policy to prevent any usage of that account outside a known region, for example, us-east-1. You might also apply a service control policy which only allows a certain size of EC2 instance to be used within the account. Service control policies are a really powerful feature for any larger, more complex AWS deployments.
+
+The really critical thing though, to understand about service control policies is they don't grant any permissions. Service control policies are just a boundary. They define the limit of what is and isn't allowed within the account, but they don't grant permissions.
+
+You still need to give identities within that AWS account, permissions to AWS resources, but any SCPs will limit the permissions that can be assigned to individual identities. Now, you can use service control policies in two ways. You can block by default, and allow certain services, which is an allow list.
+
+Or you can allow by default and block access to certain services, which is a deny list. Now, the default is a deny list. When you enable SCPs on your organization, AWS apply a default policy, which is called full AWS access.
+
+And this is applied to the organization and all OUs within that organization. This policy means that in the default implementation, service control policies have no effect since nothing is restricted. As a reminder, service control policies don't grant permissions, but when SCPs are enabled, there is an implicit default deny, just like IAM policies.
+
+If you had no initial allow, then everything would be denied. So the default is this full access policy, which essentially means no restrictions. It has the effect of making SCPs a deny list architecture, so you need to add any restrictions that you want to any AWS accounts within the organization.
+
+An example is that you could add another policy, such as this one, called DenyS3. And this adds a deny policy for the entire S3 set of API operations, effectively denying S3. You need to remember that SCPs don't actually grant any access rights, but they establish which permissions can be granted in an account.
+
+So the same priority rules apply. Deny, allow, deny. Anything explicitly allowed in an SCP is a service which can have access granted to identities within that account, unless there's an explicit deny within an SCP, then a service cannot be granted.
+
+Explicit deny always wins. And in the absence of either, if we didn't have this full AWS access policy in place, then there would be an implicit deny, which blocks access to everything. Now, the benefit to using deny lists is that because your foundation is to allow wild card access, so all actions on all resources, as AWS extends the amounts of products and services which are available inside the platform, this allow list constantly expands to cover those services, so it's fairly low admin overhead.
+
+You simply need to add any services which you want to deny access to via an explicit deny. Now, in certain situations, you might need to be more conscious about usage in your accounts, and that's where you'd use allow lists. To implement allow lists, it's a two-part architecture.
+
+One part of it is to remove the AWS full access policy. And this means that only the implicit default deny is in place and active and then you would need to add any services which you want to allow into a new policy. In this case, S3 and EC2.
+
+So in this architecture, we wouldn't have this full AWS access. We would be explicitly allowing S3 and EC2 access. So no matter what identity permissions identities in this account are provided with, they would only ever be allowed to access S3 and EC2.
+
+Now, this is more secure because you have to explicitly say which services can be allowed access for users in those accounts, but it's much easier to make a mistake and block access to services, which you didn't intend to. It's also much more admin overhead because you have to add services as your business requirements dictate. You can't simply have access to everything and deny services you don't want access to.
+
+With this type of architecture, you have to explicitly add each and every service which you want identities within the account to be able to access. Generally, I would normally suggest using a deny list architecture, because simply put, it's much lower admin overhead. Now, before we go into a demo, I want to visually show you how SCPs affect permissions.
+
+This is visually how SCPs impact permissions within an AWS account. In the left orange circle, this represents the different services that have been granted access to identities in an account using identity policies. On the right in red, this represents which services an SCP allows access to.
+
+So the SCP states that the three services in the middle and the service on the right are allowed access as far as the SCP is concerned, and the identity policies which were applied to identities within the account, so the orange circle on the left, grant access to four different services, the three in the middle and the one on the left. Now, only permissions which are allowed within identity policies in the account and are allowed by a service control policy are actually active. On the right, this access permission has no effect, because while it's allowed within an SCP, an SCP doesn't grant access to anything, it just controls what can and can't be allowed by identity policies within that account.
+
+Because no identity policy allows access to this resource, then it has no effect. On the left, this particular access permission is allowed within an identity policy, but it's not effectively allowed because it's not allowed within an SCP. So only things which are involved, the identity policy and an SCP are actually allowed.
+
+In this case, this particular access permission on the left has no effect because it's not within a service control policy, so it's denied. Now, at an associate level, this is what you need to know for the exam. It's just simply understanding that your effective permissions for identities within an account are the overlap between any identity policies and any applicable SCPs.
+
+Now, this is going to make more sense if you experience it with a demo, so this is what we're going to do next. Now that you've set up the AWS organization for the Animals4life business, it's time to put some of this into action. So I'm going to finish this lesson here and then in the next lesson which is a demo, we're going to continue with the practical part of implementing SCPs.
+
+So go ahead and complete this video and when you're ready, I'll look forward to you joining me in the next.
+
+## iam-demo-using-service-control-policies
+
+Welcome back and in this demo lesson I want to give you some experience of working with service control policies or SCPs. At this point you've created the AWS account structure which you'll be using for the remainder of the course. You've made an AWS organization and the general account which created that AWS organization became the management account of the organization.
+
+and in addition to that you invited the production AWS account into the organization and created the development account within the organization. Now in this demo lesson I want to show you how you can use service control policies to restrict what identities within an AWS account can do and this is a feature which comes part of AWS organizations. Now before we do that I want to tidy up the AWS organization So make sure that you're logged into the general account, so the management account of the organization, and then just move to the organization's console.
+
+You can either type that in the 'Find Services' box, or it should be available in 'Recently Used Services'. Now, as I talked about in the previous lessons, AWS Organizations includes the ability to organize accounts with a hierarchical structure, and currently there's only the root container of the organization. Now to create a hierarchical structure we need to create some organizational units and we're going to create a development organizational unit and a production organizational unit.
+
+So to do that select the root container at the top of the organizational structure then click actions and create new. And we're going to call the organizational unit for production 'prod' so type prod into name of organizational unit Scroll down and click on 'Create Organizational Unit' and then do the same for 'Development' so make sure 'Route' is still selected click on 'Actions' and then 'Create New' Under 'Name' just type 'dev' and then scroll down and click on 'Create Organizational Unit' Now we're going to move our AWS accounts into these relevant organizational units so currently the 'Development', 'Production' and 'General' accounts are all contained in this 'Route' container So this is the topmost point of our hierarchical structure inside our organisation. So to move accounts we need to select them and then move them into each of the relevant organisational units.
+
+So go ahead and select the Production AWS account, then click on Actions and then Move. Once you're at this dialogue just select the Production Organisational Unit and click on Move. And this account will be moved inside this organisational unit.
+
+And we'll do the same for the development account. So select the development AWS account and again click on actions and then move. Select the dev OU and click on move.
+
+And now we've got these two AWS accounts inside the relevant organizational units. And if we select each of the organizational units in turn, so prod, and we can see that it's got one account inside the production OU. And then if we select "Dev", we can see that it's got the development AWS account inside of this organizational unit.
+
+So that's a simple hierarchical structure that we've created inside this organization. And the general account, so the management account of the organization, is currently within the root container of the organizational structure. So now that we've done that, to prepare for the demo part of this lesson where we're looking at service control policies, I want you to move back to the AWS console.
+
+So just click on AWS, and then click on the account dropdown, and we're going to switch roles into the production AWS account. So select 'Prod' from 'Role History'. Now once we're here, we're going to create an S3 bucket.
+
+So type S3 into the 'Find Services' box, or alternatively, it might be within the recently used services. But either way, move to the S3 console. So once you're at the S3 console, go ahead and click on 'Create Bucket' and for bucket name, I just want you to call it 'CatPics' so C-A-T-P-I-C-S and then pick a random number at the end remember, S3 bucket names need to be globally unique so you'll need to pick a random set of numbers different than what I use and every other student uses so I'm going to pick 1, and then lots of 3s, and then 7 and make sure that you pick the US East 1 region for this bucket Once you've set all those options, just scroll all the way down to the bottom and then select "Create Bucket".
+
+Now once you've created the bucket, just go inside the bucket and we're going to upload some files into this bucket. So follow the same process that we've used before, click on "Add Files" and then attached to this lesson is a link to a cat picture that you'll need to download to your local machine and then upload that cat picture to this S3 bucket. So go ahead and download the image, locate it, go ahead and select that and click on open.
+
+And then click on upload to upload that picture into this S3 bucket. Wait for that to finish and click on close. Now this is a picture of Samson so if you click on this and then click on open, you'll see there Samson looks pretty sleepy.
+
+He does tend to sleep a lot but he's a pretty amazing cat. But what you're illustrating is that you can currently access the Samson.jpg object. and you're currently operating within the production AWS account.
+
+Now crucially the way that you're doing that is you've assumed an IAM role. By switching role into the production account what you've actually done is you've assumed the role which is called organization account access role. And if we open this role up and look at the permissions it currently has the administrator access managed policy attached to this role.
+
+So you're operating inside the production account with the permissions that you've gained by assuming this role and their administrator permissions. So there should be no confusion why you can create an S3 bucket, upload an object and access that object because you have full administrator access which has been granted by attaching this managed policy to the I am role which you're currently assuming as part of switching role into the production account. What we're going to demonstrate is how this can be restricted by using service control policies So at this point move back to the main AWS console Click on the account drop-down and then click switch back to move back to the general AWS account Once we're back inside this account at the main AWS console either type AWS Organizations or select it from the recently visited services now once you're here click on policies And you'll see that currently that most of these options are currently disabled.
+
+So service control policies, tag policies, AI services, opt-out policies and backup policies. They're all disabled. Now I'll be talking about what all of these mean as you move throughout the course, but at this point I want you to click on service control policies and then click on enable service control policies and this will enable the functionality within the AWS Organization now what it's actually done as part of this is to add this full AWS access policy onto the entire Organization so if we click on full AWS access and then scroll down This is the policy which is currently associated with everything within the organization So this has the effect of adding no restrictions on to what any of the accounts within the organization can do So in effect by enabling service control policies the first policy which is applied does nothing it simply Maintains the existing functionality so all AWS accounts within the organization maintain full access to all the services provided by AWS so click on service control policies at the top to move back to the overview of all of the various SCPs that we have available within the organization What we're going to do is create our own service control policy.
+
+Now linked to this lesson is a file called DenyS3.json and this is an example of a new service control policy that we're going to apply. So go ahead and download that file and open it up in a code editor. Now this is a service control policy with two statements.
+
+The first statement is an allow statement. So the effect is allow, action is star which is a wild card and resource is also the star wildcard. Now this replicates the full AWS access service control policy that is applied by default so this allows access to all products and services within an AWS account.
+
+But this one also has a second statement which is a deny statement so this denies any S3 colon star actions on on any AWS resource. So the effect of this is to deny access to S3. Now service control policies follow the same deny, allow, deny logic as identity policies within AWS and so this explicit deny overrules this explicit allow but only for S3 colon star.
+
+So the effect of this is that if this service control policy is applied, then we'll maintain access to all AWS except S3. So we're going to apply this to the production AWS account and observe the results. So to do that, we need to copy all of this into our clipboard and then move back to the AWS console.
+
+Once you're there, make sure you're in the policy section of the console and then service control policies and then go ahead and create a policy. Scroll down and then select all of the existing JSON that's inside this policy box and then just delete it and then paste in what you've just copied into your clipboard. So just as a reminder this denies access to any S3 actions on all resources and then allows access to all of the AWS account.
+
+And then using the deny allow deny rule which by now you should be at least familiar with This means that S3 will be denied and access to all other AWS services will be available. And then scroll up to the top and for policy name we're going to call this "Allow all except S3". Once you've put that in the policy name box then just scroll all the way down to the bottom and create the policy.
+
+So now you have two service control policies, full AWS access, which allows access to every operation and then allow all except S3, which is the new service control policy we've just created. So now go ahead and click on AWS accounts on the menu on the left, and then click on the prod OU because we're going to apply this new service control policy to the production OU. And then click on the policies tab.
+
+And then we're going to do two things. First, we're going to attach the new policy that we've created. So go ahead and click on attach in the applied policies box and then select allow all except S3 and then attach that policy.
+
+And so now we have that policy that's attached to the production OEU. So go ahead and click on the policies tab again, and you can see that we have the allow all except S3 policy attached directly, the full AWS access policy that's attached directly and also the full AWS access policy that's inherited from the root container. So now what we may as well do to keep things tidy is detach the full AWS access policy that's attached directly.
+
+So check the box next to full AWS access, click on detach and then confirm by clicking detach policy. So now the only service control policy that's directly attached to the production is the one that we just created. And just as a reminder, this is the one that allows access to all AWS products and services via this explicit allow but also has this explicit deny just for S3.
+
+So now, if I go back to the main AWS console, and if I go into the S3 console, remember this is the general of the management AWS account, notice how I can see and interact with S3 within this account. If I go back to the main AWS console and click on the account drop-down and then switch roles into the production AWS account, remember this is the one that has this new service control policy attached to it, for the production AWS account now if I go into the S3 console and just wait for it to load, now we receive a permissions error. You don't have access to list buckets.
+
+Now this is because even though this role that we're using does have permissions to access S3, it's operating inside the production AWS account. Because this production AWS account has this SCP attached which explicitly denies access to S3, well we have no access to S3. Access to all of the other services are unaffected because we have administrator access we could go for example to the EC2 console and then go to instances and then go to launch an instance and we won't be doing this but if you just step through you'll see that there are no permissions errors at any point in this process so we could launch an EC2 instance.
+
+The only thing which is impacted by the service control policy is S3 and so that's the only thing that is explicitly denied because it's denied inside the service control policy. If we go back to the general account, so click on the account dropdown and then switch back. Then we go to AWS organizations, go to AWS accounts, then click on the production OU and then click on policies.
+
+If we again attach the full AWS access and then detach the allow all except S3. Now if we follow the same process and we switch role into the production AWS account because this service control policy has no explicit denies this time if we go to the S3 console we can again access this S3 bucket so we can go inside the catpix bucket and then open the object which is Samsung.jpg and there we go we can see Samsung nice and relaxed. So this just illustrates exactly how service control policies or SCPs can be used to restrict access for identities who operate inside an AWS account.
+
+In this case, the production AWS account. So we've removed this custom service control policy that we've created. Now let's just clean up by removing this bucket.
+
+So select the cat picks bucket and then whatever randomness you added onto the end and click empty. Copy and paste or type permanently delete and then select empty. Once that's completed, you can click on exit and then you should be able to delete the bucket.
+
+So select it and then click on delete. You'll need to confirm that by copying and pasting or typing the name of the bucket and then clicking delete bucket. And there you go.
+
+You've got full control over S3 as evidenced by the fact that you can delete that bucket. So now let's go back to the general account and that's the end of this demo lesson. What you've done is create a service control policy, one which allows access to the entire account but denies S3, and you've attached this policy onto the production AWS account and removed the default full AWS access policy.
+
+And you've observed how that has the effect of restricting the permissions that a full admin role has over the production account. At this point, that's everything I wanted to illustrate. I'll be talking more about boundaries and restrictions as they apply to AWS accounts and identities as you move through the course.
+
+But for now, that's everything that you need to do. So go ahead and complete this video. And when you're ready, I'll look forward to you joining me in the next.
+
+## iam-cloudwatch-logs
+
+Welcome to this lesson where I'm going to introduce the theory and architecture of CloudWatch logs. I've already covered the metrics side of CloudWatch earlier in the course, and I'm covering the logs part now because you'll be using it when we cover CloudTrail. So in the CloudTrail demo, we'll be setting up CloudTrail and using CloudWatch logs as a destination for those logs.
+
+So you'll need to understand it and so we'll be covering the architecture in this lesson. So let's jump in and get started. CloudWatch logs is a public service.
+
+The endpoint which applications connect to is hosted in the AWS public zone which means you can use the product within AWS VPCs or from on-premises environments and even other cloud platforms assuming that you have network connectivity as well as AWS permissions. The CloudWatch logs product allows you to store, monitor and access logging data. Logging data at a very basic level is a piece of information data, and a timestamp.
+
+So the timestamp is generally year, month, day, hour, minute, second, and timezone. Now there can be more fields but at a minimum it's generally a timestamp and some data. Now CloudWatch logs has some built in integrations with many AWS services.
+
+These include EC2, VPC Flow logs, Lambda, CloudTrail, R53, and many more. Any services which integrate with CloudWatch logs can store data directly inside the product. And the security for this is generally provided by using IAM roles or service roles.
+
+For anything outside AWS or for logging custom application or OS logs on EC2 for example, you can use the unified CloudWatch agent. Now I've mentioned this before, and I'll be demoing it later in the EC2 section of the course, but this is how anything outside of AWS products and services can log data into CloudWatch logs. So it's either AWS services which can log into CloudWatch directly or you use the unified CloudWatch agent.
+
+And that's how you integrate. There is a third way in which you can use the development kits for AWS and implement logging into CloudWatch logs directly into your application, but that tends to be something that we'll cover in the developer and the Devops AWS courses. For now, just remember either AWS service integrations or the unified CloudWatch agent.
+
+Now CloudWatch logs are also capable of taking logging data and generating a metric from it and this is known as a metric filter. Imagine a situation where you have a Linux instance and one of the operating system log files logs any failed connection attempts via SSH. If this logging information was injected into CloudWatch logs then a metric filter can scan those logs constantly.
+
+And anytime it sees a mention of the failed SSH connection, it can increment a metric within CloudWatch. And on that you can have alarms which can do things based on that metric and I'll be demoing that very thing later in the course. Now let's look at the architecture visually because I'll be showing you how this works in practice in the CloudTrail demo which will be coming up later in the section.
+
+Architecturally, CloudWatch logs looks like this. First, it's a regional service. So let's assume for this example, we talking about us-east-1.
+
+Now the starting point are our logging sources which can include AWS products and services, mobile or server-based applications, external compute services, so virtual or physical servers, databases, or even external API's. And these sources inject data into CloudWatch logs as log events. Now log events look like this.
+
+They have a timestamp and a message block. CloudWatch logs treats this message as a raw block of data. So it can be anything you want, but there are ways that the data can be interpreted and fields and columns defined.
+
+Log events are stored inside log streams and log streams are essentially a sequence of log events from the same source. So let's say that you had a one log file that was stored on multiple EC2 instances that you wanted to inject into CloudWatch logs. So for example, VAR log messages which stores system diagnostics under Linux.
+
+Well each log stream would represent VAR log messages for one instance. So you'd have one log stream for instance one for VAR log messages and one log stream for instance two, for VAR log messages. So each log stream is an ordered set of log events for a specific source for a specific thing.
+
+Now we also have log groups and log groups are containers for multiple log streams for the same type of logging. So continuing the VAR log messages example we would have one log group containing everything for VAR log messages. So we'd set this for VAR log messages and then inside this log group would be lots of different log streams and each log stream would represent one source.
+
+So one EC2 instance where we were receiving data for VAR log messages. Each log stream would then be a collection of log events. So every time an item was added to VAR log messages on a single EC2 instance, there would be one log event inside one log stream for that EC2 instance.
+
+Now a log group is also the place that stores configuration settings. So it's on the log group where we define things like retention settings and permissions. And when we define these settings on a log group, they obviously apply to all log streams inside that log group.
+
+It's also on log groups where metric filters are defined. So these metric filters are constantly reviewing any log events for any log streams in that log group looking for certain patterns, maybe an application error code, or a failed SSH login. When detected, these metric filters increment a metric and metrics can have associated alarms.
+
+And these alarms can be used either to notify administrators or to integrate with AWS or external systems to take action. So CloudWatch logs is a really powerful product. This is the high level architecture, but don't worry you'll get plenty of exposure to it all the way through this course because lots of AWS products integrate with CloudWatch logs and use it to store their logging data.
+
+So we'll be coming back to this product time and time again as we go through the course. CloudTrail uses CloudWatch logs, Lambda uses CloudWatch logs, VPC flow logs use CloudWatch logs. There's lots of examples of AWS products where we'll be integrating them with CloudWatch logs.
+
+So I just wanted to introduce it at this early stage of the course. But that's everything I wanted to cover in this theory lesson. So thanks for watching.
+
+Go ahead, complete this video and when you're ready, join me in the next.
+
+## iam-cloudtrail
+
+Welcome to this lesson, where I'm going to be introducing CloudTrail. CloudTrail is a product which logs API actions which affect AWS accounts. If you stop an instance, that's logged.
+
+If you change a security group, that's logged too. If you create or delete an S3 bucket, that's logged by CloudTrail. Almost everything which can be done to an AWS account is logged by this product.
+
+Now, I want to quickly start with the CloudTrail basics. The product logs API calls or account activities. And every one of those logged activities is called a CloudTrail event.
+
+A CloudTrail event is a record of an activity in an a AWS account. This activity can be an action taken by a user, a role, or a service. Now, CloudTrail by default stores the last 90 days of CloudTrail events in the CloudTrail event history.
+
+This is an area of CloudTrail which is enabled by default in AWS accounts and it's available at no cost and provides 90 days of history on an AWS account. Now, if you want to customize CloudTrail in any way beyond this 90-day event history, you need to create a trail, and we'll be looking at the architecture of a trail in a few moments' time. Now, CloudTrail events can be one of three different types.
+
+We have management events, data events, and insight events. Now, if applicable to the course that you are studying, I'll be talking about insight events in a separate video. For now, we're going to focus on management events and data events.
+
+Management events provide information about management operations that are performed on resources in your AWS account. These are also known as control plane operations. Think of things like creating an EC2 instance, terminating an EC2 instance, creating a VPC.
+
+These are all control plane operations. Now, data events contain information about resource operations performed on or in a resource. So examples of this might be objects being uploaded to S3 or objects being accessed from S3, or when a Lambda function is being invoked.
+
+By default, CloudTrail only logs management events because data events are often much higher volume. Imagine if every access to an S3 object was logged, it could add up pretty quickly. Now, a CloudTrail trail is the unit of configuration within the CloudTrail product.
+
+It's a way you provide configuration to CloudTrail on how to operate. A trail logs events for the AWS region that it's created in. That's critical to understand.
+
+CloudTrail is a regional service. But when you create a trail, it can be configured to operate in one of two ways. You can create a trail which is a one-region trail, or a trail can be set to all regions.
+
+Now, a single-region trail is only ever in the region that it's created in, and it only logs events for that region. An all-region trail, you can think of as a collection of trails in every AWS region, but it's managed as one logical trail, and it's got an additional benefit that if AWS adds any new regions, then an all-region trail is automatically updated. Now this is specific configuration item on a trail which determines if it only logs events for the region that it's in, or if it also logs global services events.
+
+Now, most services log events in the region where the event occurred. So if you create an EC2 instance in AP Southeast 2, then it's logged to that region, and a trail would either need to be a one-region trail in that region, or it would need to be an all-regions trail to pick up that event. A very small number of services log events globally to one region.
+
+So global services such as IAM, or STS, or CloudFront, these services are very globally-focused services, and they always log their events to US East 1, which is Northern Virginia. Now, these type of events are called global service events and a trail needs to have this enabled in order to log these events. This feature is normally enabled by default, if you create a trail inside the user interface.
+
+So this is really critical to understand. AWS services are largely split up into regional services and global services. So when these different types of services log to CloudTrail, they either log in the region that the event is generated in or they log to US East 1, if they're global services.
+
+So when you're diagnosing problems, when you're architecting solutions, if whatever logs you are trying to reach are generated by services which are global, so IAM, STS, and CloudFront, then these are going to be classified as global service events and that will need to be enabled on a trail. Otherwise, a trail will only log events for that isolated region that it's created in. And when you create a trail, it's one of two types, one region, so it is always isolated to that one region, and you would need to create one-region trails in every region, if you wanted to do it manually.
+
+Alternatively, you could create an all-regions trail. And that encompasses all of the regions in AWS, and it's automatically updated as AWS add new regions. Now, once you've got a trail created, management events and data events are all captured by the trail.
+
+And this is based on whether it's isolated to a region or set to all regions. But if we keep focused on an all region trail for now, then this trail is now capturing management events, and if we enable it, data events. So data events is not something that's generally enabled by default.
+
+It's something you have to explicitly set when you create a trail. So this trail is now listening to everything that's occurring in the account. If it's an all-region trail and it's got global services event logging turned on as well, it's listening to everything that's happening in the account.
+
+Now, remember that the CloudTrail event history is limited to 90 days. But when you create a trail, you could be much more flexible. A trail by default can store the events in a definable S3 bucket, and the logs which are generated and stored in an S3 bucket can be stored there indefinitely.
+
+You're only charged for the storage that's used in S3. Now, these logs are stored as a set of compressed JSON log files. And so they consume hardly any space, but they have the benefit, because they're JSON formatted, of being able to be passed by any tooling capable of reading these standard format files.
+
+So that's a really great feature of CloudTrail, that it stores this information in a fairly standard format. Now, another option is that CloudTrail can be integrated with CloudWatch logs and the data can be stored into that product. So CloudTrail can take all of the logging data that it generates, and in addition to putting it into S3, it can put it into CloudWatch logs.
+
+And once it's in CloudWatch logs, you can use that product to search through it, or using a metric filter to take advantage of the data that's put into CloudWatch logs. It makes it much more powerful and you get access to a lot more features, if you use CloudWatch logs versus S3. Now, one of the more recent additions to the CloudTrail product is that you can now create an organizational trail.
+
+And this means if you create this trail from the management account of an organization, it can store all of the information for all of the accounts inside that organization. So it's a single management point for all API and account events across every account in the organization. So that's super powerful and it makes managing multi-account environments much easier.
+
+So we need to talk through some important elements of CloudTrail point by point. So CloudTrail is enabled by default on AWS accounts, but it's only the 90-day event history that's enabled by default. So you don't get any storage in S3 unless you configure a trail.
+
+Trails are how you can take the data that CloudTrail's got access to, and store it in better places, such as S3 and CloudWatch logs. Now, the default for trails is to store management events only. So this only includes management plane events, creating an instance, stopping an instance, terminating an instance, creating or deleting S3 buckets, logins to the console.
+
+Anything that's interacting with AWS products and services from a management perspective is logged by default in CloudTrail. Data events need to be specifically enabled and they come at an extra cost. I'll talk about that in a little bit more detail in the demo lesson, because you need to be aware of the pricing of CloudTrail.
+
+Much of the service is free, but there are certain elements that do carry a cost that you do need to be aware of. Especially, if you use this in production. Now, most AWS services log data to the same region that that service is in.
+
+There are a few specific services, IAM, STS and CloudFront, which are classified as true global services, and they log their data as global service events, which gets logged to US East 1, and a trail will need to be enabled to capture that data. So that's critical. You might find that come up as an exam question.
+
+What you will also definitely find coming up as an exam style question is where they can use CloudTrail for real-time logging. Well, this is one of the limitations of the product. It is not real time.
+
+CloudTrail typically delivers log files within 15 minutes of the account activity occurring. And it generally publishes log files multiple times per hour. What this means is it's not real time.
+
+You can't trust that logging into CloudTrail will give you a complete exhaustive list of events that have happened up to the very point that you're looking. Sometimes it does take a few minutes for that data to arrive in S3 or for that data to arrive in CloudWatch logs. So keep that in mind, if you face any exam questions which talk about real-time logging, CloudTrail is not the product.
+
+Okay, so that's the end of the theory in this lesson. It's time for a demo. In the next lesson, we're going to be setting up an organizational trail within our AWS account structure.
+
+We're going to be setting it up so it's capturing all of the data for all of our member accounts and our management account. And it's going to be storing this data in an S3 bucket and CloudWatch logs within the management account. Now, I can't wait to get started.
+
+It's a fun one and it's something which will prove very useful for the exam as well as real world usage. So go ahead, complete this video, and when you're ready, you can join me in the demo lesson.
+
+## iam-demo-implementing-organizational-trail
+
+Welcome back and welcome to this CloudTrail demo where we're going to set up an organizational trail and configure it to log data for all accounts in our organization to S3 and CloudWatch logs. The first step is that you'll need to be logged into the iM admin user of the management account of the organization. So as a reminder this is the general account.
+
+To set up an organizational trail you always need to be logged into the management account. To set up individual trails you can do that locally inside each of your accounts but it's always more efficient to use an organizational trail. Now before we start the demonstration I want to talk briefly about CloudTrail pricing.
+
+I'll make sure this link is in the lesson description but essentially there is a fairly simple pricing structure to CloudTrail that you need to be aware of. Now the 90 days history that's enabled by default in every AWS account, that's free. You don't get charged for that.
+
+It comes free by default with every AWS account. Now next you have the ability to get one copy of management events free in every region in each AWS account. So that means creating one trail that's configured for management events in each region in each AWS account and that comes for free.
+
+If you create any additional trails so you get any additional copies of management events then they're charged at two dollars per 100,000 events. That won't apply to us in this demonstration but you need to be aware of that if you're using this in production. Now logging data events comes at a charge regardless of the number so we're not going to enable data events for this demo lesson but if you do enable it then that comes at a charge of 10 cents per 100,000 events and that's irrespective of how many trails you have that's from the first time you're logging any data events this charge applies.
+
+Now what we'll be doing in this demo lesson is setting up an organizational trail which will create a trail in every region in every account inside the organization. But because we get one for free in every region in every account, we won't incur any charges for the CloudTrail side of things. We will be charged for any S3 storage that we use.
+
+But S3 also comes with a free tier allocation for storage, which I don't expect us to breach. With that being said, let's get started and implement this solution. So to do that, we need to be logged in to the console UI again in the management account of the organization.
+
+And then we need to move to the CloudTrail console. Now if you've been here recently, it will be in the Recently Visited Services. If not, just type CloudTrail in the Find Services box.
+
+And then open the CloudTrail console. Once you're at the console, you might see a screen like this. If you do then you can just click on the hamburger menu on the left and then go ahead and click on trails.
+
+Now depending on when you're doing this demo if you do see any warnings about a new or old console version then just make sure that you select the new version so your console looks like what's on screen now. Now once you're here we need to create a trail so go ahead and click on create trail. To create a trail you're going to be asked for a few important pieces of information the first of which is the trail name.
+
+Now for trail name we're going to use animals4life.org so just go ahead and enter that. Now by default with this new UI version when you create a trail it's going to create it in all AWS regions in your account. If you're logged into the management account of the organization as we are you also have the ability to enable it for all regions in all accounts of your organization.
+
+So we're going to do that because this allows us to have one single logging location for all CloudTrail logs in all regions in all of our accounts so go ahead and check this box. Now by default CloudTrail stores all of its logs in an S3 bucket and when you're creating a trail you have the ability to either create a new S3 bucket to use or you can use an existing bucket. Now we're going to go ahead and create a brand new bucket for this trail.
+
+Bucket names within S3 need to be globally unique so it needs to be unique name across all regions across all AWS accounts so we're going to call this bucket we're going to start with CloudTrail so type CloudTrail and then a hyphen and then animals for life and then another hyphen and then you'll need to put a random number you'll need to pick something different from me and different from every other student doing this demo so if you get an error about the bucket name being in use you just need to change this random number. Now you're also able to specify if you want the log files stored in the S3 bucket to be encrypted. Now the way that this is done is using SSE-KMS encryption.
+
+This is something that we'll be covering elsewhere in the course and for production usage this is something that you would definitely want to use. For this demonstration to keep things simple we're not going to be encrypting the log files files and so I want you to go ahead and untick this box. Now under additional options you're able to select log file validation so this adds an extra layer of security which means that if any of the log files are tampered with you have the ability to determine that so this is a really useful feature if you're performing any account level audits.
+
+In most production situations I do enable this, but you can also elect to have an SNS notification delivery. So every time log files are delivered into this S3 bucket, you can have a notification again for production usage, or if you need to integrate this with any non AWS systems, and this is often quite useful, but for this demonstration, we'll leave this one unchecked. Now you also have the ability as well as storing these log files into S3 to store them in CloudWatch logs and this gives you extra functionality because this allows you to perform searches, look at the logs from a historical context inside the CloudWatch logs user interface as well as define event driven processes so you can configure CloudWatch logs to scan these CloudTrail logs and in the event that any particular piece of text occurs in the logs, any API call, any actions by a user, you can generate an event which can invoke for example a Lambda function or spawn some other event driven processing.
+
+And don't worry if you don't understand exactly what this means at this point I'll be talking about all of this functionality in detail elsewhere in the course. Now for this demonstration we are going to enable CloudTrail to put these logs into CloudWatch logs as well so check this box. You can choose a log group name within CloudWatch logs for these CloudTrail logs.
+
+If you want to customize this you can but we're going to leave it as the default. Now as with everything inside AWS if a service is acting on our behalf we need to give it the permissions to interact with other AWS services and CloudTrail is no exception. We need to give CloudTrail the ability to interact with CloudWatch logs and we do that using an IAM role and don't worry we'll be talking about IAM roles in detail elsewhere in the course.
+
+For this demonstration just go ahead and select new because we're going to create a new IAM role, a new IAM role that will give CloudTrail the ability to enter data into CloudWatch logs. Now what we need to do is provide a role name so go ahead and enter CloudTrail role for CloudWatch logs and then an underscore and then animals for life. The name doesn't really matter but in production settings you'll want to make sure that you're able to determine what these roles are for and so we'll use a standard naming format.
+
+Now if you expand policy document you'll be able to see the exact policy document or IAM policy document that will be used to give this role the permissions to interact with CloudWatch logs. Now don't worry at this point if you don't fully understand policy documents we'll be using them throughout the course and over time you'll become much more comfortable with exactly how they're used but at a high level this policy document will be attached to this role and this is what will give CloudTrail the ability to interact with CloudWatch logs. At this point just scroll down that's everything that we need to do go ahead and click on next.
+
+Now at this point you'll need to select what type of events you want this trail to log. You've got three different choices. The default is to log only management events so this logs any events against the account or AWS resources so things like starting or stopping an EC2 instance, creating or deleting an EBS volume those type of things will be logged using management events.
+
+You've also got data events and data events give you the ability to log any actions against things inside resources so currently CloudTrail does support a wide range of services for data event logging so you can click on this drop down and see all of the services that it supports. Now for this demonstration we won't be setting this up with data events initially because I'll be covering this elsewhere in the course so go back to the top and uncheck data events. You also have the ability to log insight events and these can identify any unusual activity errors or user behavior on your account so this is especially useful from a security perspective.
+
+Now again for this demonstration we won't be logging any insight events we're just going to log management events. For management events you can further filter down to read or write or both and optionally exclude KMS or RDS data API events and I'll be talking about KMS elsewhere in the course. For this demo lesson we're just going to go ahead and leave it as default so make sure that read and write are checked.
+
+Once you've done that go ahead and click on next on this screen you just need to review everything that all looks good so go ahead and click on create trail now at this point if you do get an error saying the s3 bucket already exists you'll just need to choose a new bucket name so click on edit at the top change the bucket name to something that's globally unique and then just follow that process through again and create the trail after a few moments that trail will be created it It should say US East Northern Virginia as the home region. Even though you didn't get the option to select it because it's selected by default, it is a multi-region trail. And then finally, it is an organizational trail, which means that this trail is now logging any cloud trail events from all regions in all accounts in this AWS organization.
+
+Now this isn't real time, and when you first enable it, it can take some time for anything to start to appear in either S3 or in CloudWatch logs. Now at this stage, what I recommend is that you pause the video and wait for 10 to 15 minutes before continuing, because the initial delivery of that first set of log files through to S3 can take some time. So pause the video, wait 10 to 15 minutes, and then you can resume.
+
+Then right click this link under S3 bucket and open that in a new tab. Then go to that tab and you should start to see a folder structure being created inside the S3 bucket. So let's move down through this folder structure, starting with CloudTrail.
+
+Let's go to US East 1 and just keep going down through this folder structure. And in my case, I have quite a few of these log files which have been delivered already. So I'm going to pick one of them, the most recent, and just click on Open.
+
+Depending on the browser that you're using, you might have to download and then uncompress this file. Because I'm using Firefox, it can natively open the GZ compressed file and then automatically open the JSON log file inside it. So this is an example of a CloudTrail event.
+
+We're able to see the user identity that actually generates this event. In this case, it's me, I am admin. We're able to see the account ID that this event is for.
+
+We can see the event source, the event name, the region, the source IP address, the user agent, in this case the console, all of the relevant information for this particular interaction with the AWS APIs are logged inside this CloudTrail event. Now don't worry if this doesn't make a lot of sense at this point. You're going to get a lot of opportunity to interact with this type of logging event as you do all the various theory and practical lessons within the course.
+
+For now, I just want to highlight exactly what to expect with CloudTrail logs. Now because we've enabled all of this logging information to also go into CloudWatch logs, we can take a look at that as well. So back at the CloudTrail console, if we just click on services, and then type CloudWatch, wait for it to pop up, locate logs underneath CloudWatch, and then open that in a new tab.
+
+Inside CloudWatch, on the left-hand menu, look for logs, and then log groups, and open that. You might need to give this a short while to populate, but once it does, you should see a log group for the cloud trail that you've just created. Go ahead and open that log group.
+
+Inside it, you'll see a number of log streams. Now these log streams will start with your unique organizational code, so this will be different for you. Then there will be the account number of the account that it represents.
+
+Again, these will be different for you. And then there'll be the region name. Because I'm only interacting with the Northern Virginia region, Currently, the only ones that I see are for US East 1.
+
+Now this particular account that I'm in, the general account of the organization, if I look at the ARN at the top or Amazon resource name, if I look at the thing after US East 1 here, this number is my account number. So this is the account number of my general account. So if I look at the log streams, in my case you'll be able to see that this account, So the general account matches this particular log stream.
+
+You'll be able to do the same thing in your account. If you look for this account ID and then match it with one of the log streams, you'll be able to pull the logs for the general AWS account. So if I go inside this particular log stream, then as CloudTrail logs any activity in this account, all of that information will be populated into CloudWatch logs.
+
+And that's what I can see here. And if I expand one of these log entries, we'll see the same formatted CloudTrail event that I just showed you in my text editor. So the only difference when using CloudWatch logs is that the CloudTrail events also get entered into a log stream in a log group within CloudWatch logs.
+
+And as you can see here, the format looks very similar. Now if we just return to the CloudTrail console, one last thing that I wanted to highlight, if you just expand the menu on the left, Whether you enable a particular trail or not, you've always got access to the event history. And the event history stores a log of all CloudTrail events for the last 90 days for this particular account, even if you don't have a specific trail enabled.
+
+So this is standard functionality. What a trail allows you to do is customize exactly what happens to that data. So this area of the console, the event history, always useful if you just want to go in and search for a particular event, maybe check who's logged onto the account recently or look at exactly what the IAM admin user has been doing within this particular AWS account.
+
+The reason why we created a trail is to persistently store that data in S3 as well as put it into CloudWatch logs which gives us that extra functionality. Now with that being said that is everything that I wanted to cover in this demo lesson. One thing that you do need to be aware of is that S3 as a service provides a certain amount of resource under the free tier that's available in every new AWS account so you can store a certain amount of data in S3 free of charge.
+
+The problem with CloudTrail and especially organizational trails is they do generate quite a large number of requests and there is also in addition to space there is a number of requests per month that are part of the free tier. Now if you leave this cloud trail enabled for the duration of your studies for the entire month then it is possible that this will go slightly over the free tier allocation for requests within the S3 service. So you might see warnings that you're approaching a billable threshold and you might even get a couple of cents of bill per month if you leave this enabled all the time.
+
+To avoid that if you just go to trails, open up the trail that you've created and then just go ahead and click on stop logging. You'll need to confirm that by clicking on stop logging and at that point no logging will occur into the S3 bucket or into CloudWatch logs and you won't experience those charges. Now for any production usage the low cost of this service means that you would normally leave it enabled in all situations but to keep costs within the free tier for this course you can if required just go ahead and stop the logging if you don't mind a few cents per month of s3 charges for cloud trail then by all means go ahead and leave it enabled with that being said though that's everything I wanted to cover in this demo lesson so go ahead complete the lesson and then when you're ready I look forward to you joining me in the next
+
+## iam-aws-control-tower-101
+
+Welcome back, and in this video, I want to talk about AWS Control Tower. This is a product which is becoming required knowledge if you need to use AWS in the real world. And because of this, it's starting to feature more and more in all of the AWS exams.
+
+I want this to be a lesson applicable to all of the AWS study paths, so think of this as a foundational lesson. And if required, for the course that you're studying, I might be going into additional detail. We do have a lot to cover, so let's jump in and get started.
+
+At a high level, Control Tower has a simple but wide ranging job, and that's to allow the quick and easy setup of multi-account environments. You might be asking, "Doesn't AWS Organizations already do that?" Well, kind of, Control Tower actually orchestrates other AWS services to provide the functionality that it does, and one of those services is AWS Organizations. But it goes beyond that.
+
+Control Tower uses Organizations, IAM Identity Center, which is the product formerly known as AWS SSO, it also uses CloudFormation, AWS Config, and much more. You can think of Control Tower as another evolution of AWS Organizations adding significantly more features, intelligence, and automation. There are a few different parts of Control Tower which you need to understand, and it's worth really focusing on understanding the distinction now because we're going to be building on this later.
+
+First, we've got the Landing Zone, and simply put, this is the multi-account environment part of Control Tower. This is what most people will be interacting with when they think of Control Tower. Think of this like AWS Organizations only with super powers.
+
+It provides via other AWS services single sign-on and ID Federation so you can use a single login across all of your AWS accounts, and even share this with your existing corporate identity store. And this is provided using the IAM Identity Center, again, the service formerly known as AWS SSO. It also provides centralized logging and auditing, and this uses a combination of CloudWatch, CloudTrail, AWS Config, and SNS.
+
+Everything else in the Control Tower product surrounds this Landing Zone, and I'll show you how this looks later in this lesson. Control Tower also provides guardrails, again, more detail on this is coming up soon. But these are designed to either detect or mandate rules and standards across all AWS accounts within the Landing Zone.
+
+You also have the Account Factory which provides really cool automation for account creation, and adds features to standardize the creation of those accounts. This goes well beyond what AWS Organizations can do on its own, and I'll show you how this works over the rest of this lesson. And if applicable, for the path that you're studying, there will be a demo coming up elsewhere in the course.
+
+Finally, there's a dashboard which offers a single-page oversight of the entire organization. At a high level, that's what you get with Control Tower. Now, things always make more sense visually, so let's step through this high-level architecture visually, and I hope this will add a little bit more context.
+
+We start with Control Tower itself, which like AWS Organizations, is something you create from within an AWS account. And this account becomes the management account at the Landing Zone. At this top, most level within the management account, we have Control Tower itself, which orchestrates everything.
+
+We have AWS Organizations, and as you've already experienced, this provides the multi-account structure, so organizational units and service control policies. And then, we have single sign-on provided by the IAM Identity Center, which historically was known as AWS SSO. This allows for, as the name suggests, single sign-on, which means we can use the same set of internal or federated identities to access everything in the Landing Zone that we have permissions to.
+
+This works in much the same way as AWS SSO worked, but it's all set up and orchestrated by Control Tower. When Control Tower is first set up, it generally creates two organizational units. The foundational organizational units, which by default is called Security, and a custom organizational unit, which by default is named Sandbox.
+
+Inside the foundational or security organizational unit, Control Tower creates two AWS accounts, the Audit account and the Log Archive account. The Log Archive account is for users that need access to all logging information for all of your enrolled accounts within the Landing Zone. Examples of things used within this account are AWS Config and CloudTrail logs, so they're stored within this account so that they're isolated.
+
+You have to explicitly grant access to this account, and it offers a secure, read-only Archive account for logging. The Audit account is for your users which need access to the audit information made available by Control Tower. You can also use this account as a location for any third-party tools to perform auditing of your environment.
+
+It's in this account that you might use SNS for notifications of changes to governance and security policies, and CloudWatch for monitoring Landing Zone wide metrics. It's at this point where Control Tower becomes really awesome because we have the concept of an Account Factory. Think of this as a team of robots who are creating, modifying, or deleting AWS accounts as your business needs them.
+
+And this can be interacted with both from the Control Tower console or via the Service Catalog. Within the custom organizational unit, Account Factory will create AWS accounts in a fully automated way as many of them as you need. The configuration of these accounts is handled by Account Factory.
+
+So, from an account and networking perspective, you have a baseline or cookie-cutter configurations applied, and this ensures a consistent configuration across all AWS accounts within your Landing Zone. Control Tower utilizes CloudFormation under the covers to implement much of this automation, so expect to see stacks created by the product within your environment. And Control Tower uses both, AWS Config and Service Control Policies, to implement account guardrails.
+
+And these detect drifts away from governance standards, or prevent those drifts occurring in the first place. At a high level, this is how Control Tower looks, now the product can scale from simple to super complex. This is a product which you need to use in order to really understand.
+
+And depending on the course that you're studying, you might have the opportunity to get some hands-on later in the course. If not, don't worry, that means that you only need this high-level understanding for the exam. Let's move on and look at the various parts of Control Tower in a little bit more detail.
+
+Let's quickly step through the main points at the Landing Zone. It's a feature designed to allow anyone to implement a well-architected, multi-account environment, and it has the concept of a home region, which is the region that you initially deploy the product into, for example, us-east-1. You can explicitly allow or deny the usage of other AWS regions, but the home region, the one that you deploy into, is always available.
+
+The Landing Zone is built using AWS Organizations, AWS Config, CloudFormation, and much more. Essentially, Control Tower is a product which brings the features of lots of different AWS products together and orchestrates them. I've mentioned that there's a concept of the foundational OU, by default called the Security OU, and within this, Log Archive and Audit AWS accounts.
+
+And these are used mainly for security and auditing purposes. You've also got the Sandbox OU which is generally used for testing and less rigid security situations. You can create other organizational units and accounts, and for a real-world deployment of Control Tower, you're generally going to have lots of different organizational units.
+
+Potentially, even nested ones to implement a structure which works for your organization. Landing Zone utilizes the IAM Identity Center, again, formerly known as AWS SSO, to provide SSO or single sign-on services across multiple AWS accounts within the Landing Zone, and it's also capable of ID Federation. And ID Federation simply means that you can use your existing identity stores to access all of these different AWS accounts.
+
+The Landing Zone provides monitoring and notifications using CloudWatch and SNS, and you can also allow end users to provision new AWS accounts within the Landing Zone using Service Catalog. This is the Landing Zone at a high level, let's next talk about guardrails. Guardrails are essentially rules for multi-account governance.
+
+Guardrails come in three different types, mandatory, strongly recommended, or elective. Mandatory ones are always applied. Strongly recommended are obviously strongly recommended by AWS.
+
+And elective ones can be used to implement fairly niche requirements, and these are completely optional. Guardrails themselves function in two different ways. We have preventative and these stop you doing things within your AWS accounts in your Landing Zone, and these are implemented using Service Control policies, which are part at the AWS Organizations product.
+
+These guardrails are either enforced or not enabled, so you can either enforce them or not. And if they're enforced, it's simply means that any actions defined by that guardrail are prevented from occurring within any of your AWS accounts. An example of this might be to allow or deny usage of AWS regions, or to disallow bucket policy changes within accounts inside your Landing Zone.
+
+The second functional type of guardrail is detective, and you can think of this as a compliance check. This uses AWS Config rules and allows you to check that the configuration of a given thing within an AWS account matches what you define as best practice. These type of guardrails are either clear, in violation, or not enabled.
+
+And an example of this would be a detective guardrail to check whether CloudTrail is enabled within a AWS account, or whether any EC2 instances have public IPv4 addresses associated with those instances. The important distinction to understand here is that preventative guardrails will stop things occurring, and detective guardrails will only identify those things. So, guardrails are a really important security and governance construct within the Control Tower product.
+
+Lastly, I want to talk about the Account Factory itself, this is essentially a feature which allows automated account provisioning, and this can be done by either cloud administrators or end users with appropriate permissions. And this automated provisioning includes the application of guardrails, so any guardrails which defined can be automatically applied to these automatically provisioned AWS accounts. Because these accounts can be provisioned by end users, think of these as members of your organization, then either these members of your organization or anyone that you define can be given admin permissions on an AWS account which is automatically provisioned.
+
+This allows you to have a truly, self-service, automatic process for provisioning AWS accounts so you can allow any member of your organization within tightly controlled parameters to be able to provision accounts for any purpose which you define as okay. And that person will be given admin rights over that AWS account. These can be long-running accounts or short-term accounts, these accounts are also configured with standard account and network configuration.
+
+If you have any organizational policies for how networking or any account settings are configured, these automatically provisioned accounts will come with this configuration. And this includes things like the IP addressing used by VPCs within the accounts which could be automatically configured to avoid things like addressing overlap. And this is really important when you're provisioning accounts at scale.
+
+The Account Factory allows accounts to be closed or repurposed, and this whole process can be tightly integrated with a businesses SDLC or software development life cycle. So, as well as doing this from the console UI, the Control Tower product and Account Factory can be integrated using APIs into any SDLC processes that you have within your organization. If you need accounts to be provisioned as part of a certain stage of application development, or you want accounts to be provisioned as part of maybe client demos or software testing, then you can do this using the Account Factory feature.
+
+At this point, that is everything I wanted to cover at this high level about the Control Tower. If you need practical experience of Control Tower for the course that you are studying, there will be a demo lesson coming up elsewhere in the course, which gives you that practical experience. Don't be concerned if this is the only lesson that there is, or if there's this lesson plus additional deep-dive theory.
+
+I'll make sure, for whatever course you're studying, you have enough exposure to Control Tower. With that being said, though, that is the end of this high-level video. So go ahead and complete the video, and when you're ready, I'll look forward to you joining me in the next.
+
